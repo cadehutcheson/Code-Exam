@@ -1,27 +1,20 @@
-#firestore method
 import firebase_admin
 #method 1
 from firebase_admin import db
 #method 2
 from firebase_admin import firestore
-
 from firebase_admin import credentials
-
-#realtime method
 from firebase import firebase
-
 
 #from os import times_result
 from socket import *
-#from time import ctime
-#import struct
+
 import threading
 import time
 from queue import Queue
 import sys
 
 #firestore method
-#method 2
 #get firebase private key file
 cred = firebase_admin.credentials.Certificate("./pythonServiceAccountKey.json")
 #initialize firebase
@@ -32,6 +25,7 @@ db = firestore.client()
 #Reatime Method
 #firebase = firebase.FirebaseApplication("https://codeexamdata-default-rtdb.firebaseio.com/", None)
 
+#queue will push and pop data to be sent to database, stored elements are lists of 2 dictionaries
 q = Queue(maxsize = 10)
 
 
@@ -42,34 +36,30 @@ PORT = 21567
 BUFSIZE = 1024
 ADDR = (HOST, PORT)
 
+player_name = ''
+
+#send data to database
 def send_Firebase(data):
-    
-    # firstData = {
-    #     'name' : "Lebron James",
-    #     'points': 100
-    # }
-    print(data[0])
-    print(data[1])
-    #firestore method
+
+    #send respective data to specified collection within db
     db.collection('chartData').add(data[0])
     db.collection('timeData').add(data[1])
 
-def read_data(): #process for app control
+def read_data(): #process for listening for data through port
     
     while True:
-        #create server side tcp socket to listen for incoming data from app
+        #create socket to listen for incoming data
         sock = socket(AF_INET, SOCK_STREAM)
         #sock.setblocking(0)
         #sock.settimeout(0.5)
         sock.bind(ADDR)
-        print("a1")
         sock.listen(5)
         
     
         while True:
             print("Begin reading data")
-            # data sent in multiple sends will be parsed together by recive if not handled yet
             try:
+                #accept data when recognized, name sender addr
                 client,addr = sock.accept()
                 data_bytes = ''
                 data_bytes = client.recv(BUFSIZE)
@@ -77,19 +67,29 @@ def read_data(): #process for app control
                     print("not data, break")
                     break
                 else:
-                    print("command recieved:" + str(data_bytes))
-                    #time.sleep(3)
+                    print("command recievedf from: ", addr)
+                    #decode byte data to string
                     data_str = data_bytes.decode()
+
+                    #convert data for proper storage in db
+                    #data for chart 1 and chart 2 are separated by "/"
                     split_data = data_str.split('/')
+
+                    #data fields are separated by "_"
                     data_career = split_data[0].split('_')
                     data_seasons = split_data[1].split('_')
+                    player_name = data_career[0]
+
+                    #array values are separated by ","
                     data_seasons_seasonID = data_seasons[0].split(',')
                     data_seasons_seasonPTS = data_seasons[1].split(',')
                     data_seasons_seasonAST = data_seasons[2].split(',')
-                    #data_seasons_seasonID.pop()
-                    #data_seasons_seasonPTS.pop()
+
+                    #pts and ast array converted from string to int for storage
                     data_seasons_seasonPTS =list(map(int,data_seasons_seasonPTS))
                     data_seasons_seasonAST =list(map(int,data_seasons_seasonAST))
+
+                    #package all fields into single array to be sent to db collections
                     data_dict_career = {
                         'name': data_career[0],
                         'points': data_career[1],
@@ -102,31 +102,24 @@ def read_data(): #process for app control
                         'assists': data_seasons_seasonAST
                     }
                     q.put([data_dict_career,data_dict_season])
-                    print("end")
-                    #Thread?
-                    #store_data()
             except KeyboardInterrupt:
-                print("exitedd")
+                print("exited")
                 exit()
-        print("read loop broke")
+        #print("read loop broke")
 
 def store_data():
     #store to firebase
     while True:
-        #while statement redundant if q.get is blocking?
-        #print("looping store")
-        #time.sleep(1)
-        
-        #while q.empty() is False:
-        #print("Waiting to store")
+        #Enter if queue receives an item
         if q.empty() is False:
+            #pop data to be store, run storage function
             data = q.get()
-            print("Storing " + str(data) + " to Firebase")
+            print("Storing ", player_name, " stats to Firebase")
             send_Firebase(data)
 
         
 
-
+#thread allow to read and store simultaneously 
 t_read = threading.Thread(target=read_data)
 t_store = threading.Thread(target=store_data)
 

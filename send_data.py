@@ -69,18 +69,17 @@ while True:
     season_assists += (str(season_totals['rowSet'][-1][s_assists_index]))
 
     print(f"Total regular season points scored: {total_points}")
-    print(f"Assists: {total_assists}")
+    print(f"Total regular season assists: {total_assists}")
 
-    print("Seasons: ", season_years)
-    print("Season total points: ", season_points)
-    print("Season total assists: ", season_assists)
+    print("Seasons played: ", season_years)
+    print("Season totals - points: ", season_points)
+    print("Season totals - assists: ", season_assists)
 
     if total_points <= 0:
         print("Invalid points")
         pass
 
-    data = f"{player_name}_{total_points}_{total_assists}/{season_years}_{season_points}_{season_assists}"
-    print(len(data))  
+    data = f"{player_name}_{total_points}_{total_assists}/{season_years}_{season_points}_{season_assists}" 
     # Read data from the terminal and send it to the server
     
     while True:
@@ -91,7 +90,7 @@ while True:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((IP_ADDRESS, PORT))
             data = f"{player_name}_{total_points}_{total_assists}/{season_years}_{season_points}_{season_assists}"
-            print("connected!", data," sent to ", IP_ADDRESS)
+            print("connected! ", player_name, " stats sent to ", IP_ADDRESS)
             data_bytes = data.encode()
             sock.send(data_bytes)
             break
