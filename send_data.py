@@ -48,6 +48,7 @@ while True:
 
     seasons_index = season_totals['headers'].index('SEASON_ID')
     s_points_index = season_totals['headers'].index('PTS')
+    s_assists_index = season_totals['headers'].index('AST')
 
     # Extract the total points scored from the row
     total_points = career_totals_row[pts_index]
@@ -55,30 +56,41 @@ while True:
 
     season_years=""
     season_points=""
-    for i in range(len(season_totals['rowSet'])):
+    season_assists=""
+    for i in range(len(season_totals['rowSet']) -1):
+        if season_totals['rowSet'][i][seasons_index] == season_totals['rowSet'][i+1][seasons_index]:
+            continue
         season_years += (str(season_totals['rowSet'][i][seasons_index])) + ","
         season_points += (str(season_totals['rowSet'][i][s_points_index])) + ","
+        season_assists += (str(season_totals['rowSet'][i][s_assists_index])) + ","
+    
+    season_years += (str(season_totals['rowSet'][-1][seasons_index]))
+    season_points += (str(season_totals['rowSet'][-1][s_points_index]))
+    season_assists += (str(season_totals['rowSet'][-1][s_assists_index]))
 
     print(f"Total regular season points scored: {total_points}")
     print(f"Assists: {total_assists}")
 
     print("Seasons: ", season_years)
     print("Season total points: ", season_points)
+    print("Season total assists: ", season_assists)
 
     if total_points <= 0:
         print("Invalid points")
         pass
 
-
+    data = f"{player_name}_{total_points}_{total_assists}/{season_years}_{season_points}_{season_assists}"
+    print(len(data))  
     # Read data from the terminal and send it to the server
     
     while True:
+        print()
         try:
         #connect to IP & port
         # Create a socket
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((IP_ADDRESS, PORT))
-            data = f"{player_name}_{total_points}_{total_assists}/{season_years}_{season_points}"
+            data = f"{player_name}_{total_points}_{total_assists}/{season_years}_{season_points}_{season_assists}"
             print("connected!", data," sent to ", IP_ADDRESS)
             data_bytes = data.encode()
             sock.send(data_bytes)
@@ -89,3 +101,4 @@ while True:
 
     # Close the socket
 sock.close()
+

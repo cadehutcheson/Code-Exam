@@ -23,7 +23,7 @@ import sys
 #firestore method
 #method 2
 #get firebase private key file
-cred = firebase_admin.credentials.Certificate("./Python/pythonServiceAccountKey.json")
+cred = firebase_admin.credentials.Certificate("./pythonServiceAccountKey.json")
 #initialize firebase
 firebase_admin.initialize_app(cred)
 
@@ -85,9 +85,11 @@ def read_data(): #process for app control
                     data_seasons = split_data[1].split('_')
                     data_seasons_seasonID = data_seasons[0].split(',')
                     data_seasons_seasonPTS = data_seasons[1].split(',')
-                    data_seasons_seasonID.pop()
-                    data_seasons_seasonPTS.pop()
+                    data_seasons_seasonAST = data_seasons[2].split(',')
+                    #data_seasons_seasonID.pop()
+                    #data_seasons_seasonPTS.pop()
                     data_seasons_seasonPTS =list(map(int,data_seasons_seasonPTS))
+                    data_seasons_seasonAST =list(map(int,data_seasons_seasonAST))
                     data_dict_career = {
                         'name': data_career[0],
                         'points': data_career[1],
@@ -96,7 +98,8 @@ def read_data(): #process for app control
                     data_dict_season = {
                         'name': data_career[0],
                         'years': data_seasons_seasonID,
-                        'points': data_seasons_seasonPTS
+                        'points': data_seasons_seasonPTS,
+                        'assists': data_seasons_seasonAST
                     }
                     q.put([data_dict_career,data_dict_season])
                     print("end")
