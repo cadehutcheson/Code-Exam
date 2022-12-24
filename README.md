@@ -1,6 +1,6 @@
 # Code-Exam - Python
 
-Tis repo is for the python portion of the code exam.
+This repo is for the python portion of the code exam.
 
 send_data.py - Uses “nba_api” package to get statistics of an NBA player that is inputted by the user. Finds data for the player’s total career points and assists, as well as lists of  point and assist totals for each individual season. Data is concatenated into a string, encoded, and then sent to a given IP address through a given port.
 
